@@ -1,0 +1,175 @@
+\subsection{Brief Introduction to Optimal Control Theory}
+
+Optimal control is a subfield of mathematical optimization that deals with optimizing over continuous states. The goal is often to find an input function that makes a dynamical system behave in a certain way. If the dynamical system can be expressed as an explicit ODE:
+
+\begin{equation}
+    \dot{\bm{x}} = \bm{f}(t, \bm{x}, \bm{u})
+    \label{eq:optimalcontrolode}
+\end{equation}
+
+\noindent with state $\bm{x}(t)$, input $\bm{u}(t)$, these types of optimization problems can be stated on the form:
+
+\begin{equation}
+    \begin{aligned}
+        \min_{\bm{u}(t)} \quad & h(t_1, \bm{x}(t_1), \bm{u}(t_1)) + \int_{t_0}^{t_1} g(t, \bm{x}(t), \bm{u}(t)) dt \\
+        \textrm{s.t.} \quad & \dot{\bm{x}} = \bm{f}(t, \bm{x}, \bm{u}) \\
+        & \bm{x}(t_0) = \bm{x}_0 \\
+    \end{aligned}
+    \label{eq:continuousoptimalcontrol}
+\end{equation}
+
+\noindent for some initial value $\bm{x}(t_0) = \bm{x}_0$, where the optimization is done over a space of functions. The objective function consists of a function $h$ to explicitly value the final state at $t_1$ along with an instantaneous function $g$ to value the states along the trajectory leading to the final state.
+
+Continuous-time optimal control problems can often be challenging to solve analytically. In practice it is more common to discretize $\bm{u}$ and $\bm{x}$ to search over a vector space instead of a function space. The constraint $\dot{\bm{x}} = \bm{f}(t, \bm{x}, \bm{u})$ can then be split up into multiple discretized constraints leading to the optimization problem:
+
+\begin{equation}
+    \begin{aligned}
+        \min_{\bm{u} \in \mathbb{R}^{m}} \quad & h(t_1, \bm{x}_n, \bm{u}_n) + \sum_{i=0}^{n-1} g(t_0 + i h, \bm{x}_i, \bm{u}_i) \\
+        \textrm{s.t.} \quad & \bm{x}_2 - \bm{x}_1 = \bm{f}(t_0, \bm{x}, \bm{u}) \\
+        & \bm{x}_3 - \bm{x}_2 = \bm{f}(t_0 + h, \bm{x}, \bm{u}) \\
+        & \vdots \\
+        & \bm{x}_n - \bm{x}_{n-1} = \bm{f}(t_0 + (n - 1) h, \bm{x}, \bm{u}) \\
+        & \bm{x}_1 = \bm{x}_0
+    \end{aligned}
+\end{equation}
+
+\noindent with $\bm{x}_1 = \bm{x}(t_0)$, $\bm{x}_2 = \bm{x}(t_0 + h)$ up to $\bm{x}_n = \bm{x}(t_1)$. The choice of discretization step size $h$ defines the number of constraints and new variables such that $n = \frac{t_1 - t_0}{h}$.
+
+The problem can be converted into an unconstrained problem by introducing new variables $\bm{\lambda}_i$ called Lagrange multipliers. This results in the form:
+
+\begin{equation}
+    \begin{aligned}
+        \min_{\bm{u} \in \mathbb{R}^{m}} \quad & L(\bm{x}, \bm{u}) - \sum_{i=1}^{n-1} \bm{\lambda}_i^T (\bm{x}_{i+1} - \bm{x}_i - \bm{f}_i(\bm{x}, \bm{u})) \\
+    \end{aligned}
+\end{equation}
+
+\noindent and can be solved with numerical methods such as gradient descent.
+
+The continuous-time problem (\ref{eq:continuousoptimalcontrol}) can be converted to a similar form by exchanging the sum with an integral and considering $\bm{x}$, $\bm{u}$ and the Lagrange multiplier $\bm{\lambda}$ as continuous functions. But this is as mentioned less practical to solve without discretizing:
+
+\begin{equation}
+    \begin{aligned}
+        \min_{\bm{u}(t)} \quad & h(t_1, \bm{x}(t_1), \bm{u}(t_1)) + \int_{t_0}^{t_1} g(t, \bm{x}(t), \bm{u}(t)) dt - \int_{t_0}^{t_1} \bm{\lambda}(t)^T (\dot{\bm{x}} - \bm{f}(t, \bm{x}, \bm{u})) dt \\
+    \end{aligned}
+\end{equation}
+
+\subsection{Adjoint Method for Neural ODEs}
+
+The goal of training a Neural ODE model is to find the neural network parameter vector $\bm{\theta}$ that minimizes the loss function $\mathcal{L}$ which depends on the network output $\bm{x}(t_1)$. If the input function $\bm{u}$ is considered as some arbitrary function of $\bm{\theta}$ (and potentially $\bm{x}$ and $t$) it is possible to view the neural network function $\bm{f}(t, \bm{x}; \bm{\theta})$ as the closed loop dynamics of the system, transforming the optimal control ODE (\ref{eq:optimalcontrolode}) to the form: $\dot{\bm{x}} = \bm{f}(t, \bm{x}; \bm{\theta})$. This results in the following optimization problem:
+
+\begin{equation}
+    \begin{aligned}
+        \min_{\bm{\theta}} \quad & \mathcal{L}(\bm{x}(t_1)) \\
+        \textrm{s.t.} \quad & \dot{\bm{x}} = \bm{f}(t, \bm{x}; \bm{\theta}) \\
+        & \bm{x}(t_0) = \bm{x}_0 \\
+    \end{aligned}
+\end{equation}
+
+\noindent with the initial value $\bm{x}_0$ as the input to the Neural ODE. To solve the problem numerically with gradient descent, it is necessary to compute the gradients of $\mathcal{L}$ with respect to $\bm{\theta}$. Start by defining the unconstrained problem with Lagrange multipliers:
+
+\begin{equation}
+    \begin{aligned}
+        \min_{\bm{\theta}} \quad & \Psi = \mathcal{L}(\bm{x}(t_1)) - \int_{t_0}^{t_1} \bm{\lambda}(t)^T (\dot{\bm{x}} - \bm{f}(t, \bm{x}; \bm{\theta})) dt\\
+    \end{aligned}
+    \label{eq:unconstrainednodeadjoint}
+\end{equation}
+
+\noindent with the Lagrange multiplier $\bm{\lambda}(t)$ being a continuous function in time. Because $\dot{\bm{x}} - \bm{f}(t, \bm{x}; \bm{\theta}) = 0$ for a solution to satisfy the constraint, also get that $\frac{d \Psi}{d \bm{\theta}} = \frac{d \mathcal{L}}{d \bm{\theta}}$. Now expand the integral part of $\Psi$:
+
+$$
+\int_{t_0}^{t_1} \bm{\lambda}^T (\dot{\bm{x}} - \bm{f}) dt = \int_{t_0}^{t_1} \bm{\lambda}^T \dot{\bm{x}} dt - \int_{t_0}^{t_1} \bm{\lambda}^T \bm{f} dt
+$$
+
+Do integration by parts on the first term:
+
+$$
+\int_{t_0}^{t_1} \bm{\lambda}^T \dot{\bm{x}} dt = \bm{\lambda}(t)^T \bm{x}(t) \big \rvert_{t_0}^{t_1} - \int_{t_0}^{t_1} \dot{\bm{\lambda}}^T \bm{x} dt
+$$
+
+Leading to:
+
+$$
+\Psi = \mathcal{L}(\bm{x}(t_1)) - \bm{\lambda}(t_1)^T \bm{x}(t_1) + \bm{\lambda}(t_0)^T \bm{x}(t_0) + \int_{t_0}^{t_1} (\dot{\bm{\lambda}}^T \bm{x} + \bm{\lambda}^T \bm{f}) dt
+$$
+
+Then calculate the derivative:
+
+$$
+\frac{d \mathcal{L}}{d \bm{\theta}} = \frac{d \Psi}{d \bm{\theta}}
+= \frac{d}{d \bm{\theta}} \mathcal{L}(\bm{x}(t_1))
+- \frac{d}{d \bm{\theta}} \bm{\lambda}(t_1)^T \bm{x}(t_1)
++ \frac{d}{d \bm{\theta}} \bm{\lambda}(t_0)^T \bm{x}(t_0)
++ \frac{d}{d \bm{\theta}} \int_{t_0}^{t_1} (\dot{\bm{\lambda}}^T \bm{x} + \bm{\lambda}^T \bm{f}) dt
+$$
+
+$$
+\frac{d \mathcal{L}}{d \bm{\theta}}
+= \frac{\partial \mathcal{L}}{\partial \bm{x}(t_1)} \frac{d \bm{x}(t_1)}{d \bm{\theta}}
+- \bm{\lambda}(t_1)^T \frac{d \bm{x}(t_1)}{d \bm{\theta}}
++ \int_{t_0}^{t_1} \frac{d}{d \bm{\theta}}(\dot{\bm{\lambda}}^T \bm{x} + \bm{\lambda}^T \bm{f}) dt
+$$
+
+\noindent where some terms disappear because $\frac{\partial \bm{\lambda}}{\partial \bm{\theta}} = 0$ and $\frac{\partial \bm{x}(t_0)}{\partial \bm{\theta}} = 0$. Furthermore:
+
+$$
+\frac{d \mathcal{L}}{d \bm{\theta}}
+= \begin{bmatrix} \frac{\partial \mathcal{L}}{\partial \bm{x}(t_1)}
+- \bm{\lambda}(t_1)^T \end{bmatrix} \frac{d \bm{x}(t_1)}{d \bm{\theta}}
+- \int_{t_0}^{t_1} \begin{bmatrix} \dot{\bm{\lambda}}^T \frac{d \bm{x}}{d \bm{\theta}} + \bm{\lambda}^T \frac{\partial \bm{f}}{\partial \bm{\theta}}
++ \bm{\lambda}^T \frac{\partial \bm{f}}{\partial \bm{x}} \frac{d \bm{x}}{d \bm{\theta}} \end{bmatrix} dt
+$$
+
+$$
+\frac{d \mathcal{L}}{d \bm{\theta}}
+= \begin{bmatrix} \frac{\partial \mathcal{L}}{\partial \bm{x}(t_1)}
+- \bm{\lambda}(t_1)^T \end{bmatrix} \frac{d \bm{x}(t_1)}{d \bm{\theta}}
+- \int_{t_0}^{t_1} \begin{bmatrix} \dot{\bm{\lambda}}^T
++ \bm{\lambda}^T \frac{\partial \bm{f}}{\partial \bm{x}} \end{bmatrix} \frac{d \bm{x}}{d \bm{\theta}} dt
++ \int_{t_0}^{t_1} \bm{\lambda}^T \frac{\partial \bm{f}}{\partial \bm{\theta}} dt
+$$
+
+The goal is to find an expression for $\frac{d \mathcal{L}}{d \bm{\theta}}$ derived from the original optimization problem (\ref{eq:unconstrainednodeadjoint}). Both the state variable $\bm{x}(t)$ and the Lagrange multiplier $\bm{\lambda}(t)$, also called the adjoint state variable, must satisfy the constraints of the original optimization problem but their exact value is not important for the optimization itself. There exists an infinite number of possible choices for both $\bm{x}(t)$ and $\bm{\lambda}(t)$, so to make the gradient expression easier, make a conscious choice of $\bm{\lambda}(t)$ to simplify the expression the most. Both $\bm{\lambda}$ and $\dot{\bm{\lambda}}$ can then be chosen as:
+
+\begin{equation}
+    \begin{aligned}
+        \bm{\lambda}(t)^T = \frac{\partial \mathcal{L}}{\partial \bm{x}(t)}
+        & \quad \textrm{and} \quad & \dot{\bm{\lambda}}^T = - \bm{\lambda}^T \frac{\partial \bm{f}}{\partial \bm{x}}
+    \end{aligned}
+    \label{eq:adjointlagrangedynamics}
+\end{equation}
+
+\noindent which results in multiple terms cancelling in the gradient expression, leading to:
+
+\begin{equation}
+    \frac{d \mathcal{L}}{d \bm{\theta}} = \int_{t_1}^{t_0} -\bm{\lambda}(t)^T \frac{\partial \bm{f}}{\partial \bm{\theta}} dt
+\end{equation}
+
+Additionally, solving the newly defined adjoint ODE (\ref{eq:adjointlagrangedynamics}) leads to an expression of the gradient from the loss function $\mathcal{L}$ to the Neural ODE input $\bm{x}(t_0)$ assuming that $\frac{\partial \mathcal{L}}{\partial \bm{x}(t_1)} = \bm{\lambda}(t_1)^T$ is given:
+
+\begin{equation}
+    \frac{\partial \mathcal{L}}{\partial \bm{x}(t_0)} = \bm{\lambda}(t_1)^T + \int_{t_1}^{t_0} - \bm{\lambda}(t)^T \frac{\partial \bm{f}}{\partial \bm{x}} dt
+\end{equation}
+
+It is also necessary to get the value for the state $\bm{x}(t)$ to get the value for the jacobians $\frac{\partial \bm{f}}{\partial \bm{x}}$ and $\frac{\partial \bm{f}}{\partial \bm{\theta}}$. The state values $\bm{x}(t)$ can be computed from a third integral:
+
+\begin{equation}
+    \bm{x}(t_0) = \bm{x}(t_1) + \int_{t_1}^{t_0} \bm{f}(t, \bm{x}(t) ; \bm{\theta}) dt
+\end{equation}
+
+\noindent resulting in the final augmented integral:
+
+\begin{equation}
+    \begin{bmatrix}
+    \bm{x}(t_0) \\
+    \frac{\partial \mathcal{L}}{\partial \bm{x}(t_0)} \\
+    \frac{\partial \mathcal{L}}{\partial \bm{\theta}}
+    \end{bmatrix} = \begin{bmatrix}
+    \bm{x}(t_1) \\
+    \frac{\partial \mathcal{L}}{\partial \bm{x}(t_1)} \\
+    \bm{0}
+    \end{bmatrix} + \int_{t_1}^{t_0} \begin{bmatrix}
+    \bm{f}(t, \bm{x}(t) ; \bm{\theta}) \\
+    - \bm{\lambda}(t)^T \frac{\partial \bm{f}(t, \bm{x}(t) ; \bm{\theta})}{\partial \bm{x}} \\
+    - \bm{\lambda}(t)^T \frac{\partial \bm{f}(t, \bm{x}(t) ; \bm{\theta})}{\partial \bm{\theta}}
+    \end{bmatrix} dt
+\end{equation}

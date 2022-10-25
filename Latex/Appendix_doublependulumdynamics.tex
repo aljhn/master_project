@@ -1,0 +1,164 @@
+\subsection{Lagrangian Mechanics}
+
+Lagrangian Mechanics is a formulation of classical mechanics alternative to Newtonian mechanics. The resulting dynamics will be equivalent, but can be easier to derive for some systems. It is based on the principle of least action which in simple terms essentially states that any physical system will behave in a way that maximizes the scalar quantity known as the Lagrangian $\mathcal{L}$. Lagrangian mechanics also requires a set of generalized coordinates $\bm{q}$ and $\dot{\bm{q}}$ to be defined, and the Lagrangian expressed in terms of these $\mathcal{L} = \mathcal{L}(\bm{q}, \dot{\bm{q}})$.
+
+The Lagrangian is usually defined in terms of energy, more precisely it is defined as $\mathcal{L} = K - P$ where $K$ is the kinetic energy of the system and $P$ is the potential energy. For some intuition, consider an object falling in a gravitational field. Because of the effects of gravity, the object will accelerate downwards, thus increasing the kinetic energy and decreasing the potential energy.
+
+The resulting solution trajectory can be found by solving the Euler-Lagrange equation:
+
+\begin{equation}
+    \frac{d}{d t} \frac{d \mathcal{L}}{d \dot{\bm{q}}} - \frac{d \mathcal{L}}{d \bm{q}} = 0
+    \label{eq:eulerlagrange}
+\end{equation}
+
+The equation (\ref{eq:eulerlagrange}) does not take constraints or external forces into account, which are possible additions to 
+
+\subsection{Double Pendulum}
+
+%figur
+
+The double pendulum consists of two rods of lengths $l_1$ and $l_2$ with masses $m_1$ and $m_2$. The masses are considered to be point masses centered at the ends of the rods for simplicity, as opposed to for example being distributed along the rods. The double pendulum is also considered as without external forces and friction, so there is no loss of energy.
+
+Use the generalized coordinates $q_1 = \theta_1$ and $q_2 = \theta_2$ for each joint angle of the pendulum. Then start by deriving the kinetic and potential energy separately.
+
+Start by defining:
+
+$$x_1 = l_1 \sin{\theta_1}$$ 
+
+$$y_1 = l_1 \cos{\theta_1}$$
+
+$$x_2 = x_1 + l_2 \sin{\theta_2}$$
+
+$$y_2 = y_1 + l_2 \cos{\theta_2}$$
+
+\noindent which gives
+
+$$\dot{x}_1 = l_1 \cos{\theta_1} \dot{\theta}_1$$
+
+$$\dot{y}_1 = - l_1 \sin{\theta_1} \dot{\theta}_1$$
+
+$$\dot{x}_2 = \dot{x}_1 + l_2 \cos{\theta_2} \dot{\theta}_2$$
+
+$$\dot{y}_2 = \dot{y}_1 - l_2 \sin{\theta_2} \dot{\theta}_2$$
+
+\noindent and
+
+$$\dot{x_1}^2 = l_1^2 \cos{q_1}^2 \dot{q}_1^2$$
+
+$$\dot{y_1}^2 = l_1^2 \sin{q_1}^2 \dot{q}_1^2$$
+
+$$
+\dot{x_2}^2
+= l_1^2 \cos{q_1}^2 \dot{q}_1^2
++ 2 l_1 l_2 \cos{q_1} \cos{q_2} \dot{q}_1 \dot{q}_2
++ l_2^2 \cos{q_2}^2 \dot{q}_2^2
+$$
+
+$$
+\dot{y_2}^2
+= l_1^2 \sin{q_1}^2 \dot{q}_1^2
++ 2 l_1 l_2 \sin{q_1} \sin{q_2} \dot{q}_1 \dot{q}_2
++ l_2^2 \sin{q_2}^2 \dot{q}_2^2
+$$
+
+The kinetic energy $K$ is then given as:
+
+\begin{equation*}
+    K = \frac{1}{2} m_1 (\dot{x_1}^2 + \dot{y_1}^2) + \frac{1}{2} m_2 (\dot{x_2}^2 + \dot{y_2}^2)
+    + \frac{1}{2} J_1 \dot{q_1}^2 + \frac{1}{2} J_2 \dot{q_2}^2
+\end{equation*}
+
+\begin{equation*}
+    K = \frac{1}{2} m_1 l_1^2 \dot{q_1}^2
+    + \frac{1}{2} m_2 (l_1^2 \dot{q_1}^2 + l_2^2 \dot{q_2}^2 + 2 l_1 l_2 \cos(q_1 - q_2) \dot{q}_1 \dot{q}_2)
+\end{equation*}
+
+\begin{equation}
+    K = \frac{1}{2} (m_1 + m_2) l_1^2 \dot{q_1}^2
+    + \frac{1}{2} m_2 l_2^2 \dot{q_2}^2 + m_2 l_1 l_2 \cos(q_1 - q_2) \dot{q}_1 \dot{q}_2
+    \label{eq:doublependulumkinetic}
+\end{equation}
+
+\noindent and the potential energy $P$ derived from the gravitational field is given as:
+
+\begin{equation*}
+    P = - m_1 g y_1 - m_2 g y_2
+\end{equation*}
+
+\begin{equation*}
+    P = - m_1 g l_1 \cos{q_1} - m_2 g (l_1 \cos{q_1} + l_2 \cos{q_2})
+\end{equation*}
+
+\begin{equation}
+    P = - (m_1 + m_2) g l_1 \cos{q_1} - m_2 g l_2 \cos{q_2}
+    \label{eq:doublependulumpotential}
+\end{equation}
+
+Now that the Lagrangian can be defined as $\mathcal{L} = K - P$, compute both partial derivatives of the Euler-Lagrange equation (\ref{eq:eulerlagrange}) separately and for both coordinates:
+
+$$
+\frac{d \mathcal{L}}{d \dot{q}_1} = (m_1 + m_2) l_1^2 \dot{q}_1 + m_2 l_1 l_2 \cos(q_1 - q_2) \dot{q}_2
+$$
+
+$$
+\frac{d \mathcal{L}}{d \dot{q}_2} = m_2 l_2^2 \dot{q}_2 + m_2 l_1 l_2 \cos(q_1 - q_2) \dot{q}_1
+$$
+
+$$
+\frac{d \mathcal{L}}{d q_1} = - m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_1 \dot{q}_2 - (m_1 + m_2) g l_1 \sin{q_1}
+$$
+
+$$
+\frac{d \mathcal{L}}{d q_2} = m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_1 \dot{q}_2 - m_2 g l_2 \sin{q_2}
+$$
+
+\noindent and then:
+
+$$
+\frac{d}{d t} \frac{d \mathcal{L}}{d \dot{q}_1} = (m_1 + m_2) l_1^2 \ddot{q}_1 + m_2 l_1 l_2 \cos(q_1 - q_2) \ddot{q}_2 - m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_2 (\dot{q}_1 - \dot{q}_2)
+$$
+
+$$
+\frac{d}{d t} \frac{d \mathcal{L}}{d \dot{q}_2} = m_2 l_2^2 \ddot{q}_2 + m_2 l_1 l_2 \cos(q_1 - q_2) \ddot{q}_1 - m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_1 (\dot{q}_1 - \dot{q}_2)
+$$
+
+\noindent which leads to the set of equations:
+
+\begin{equation*}
+\frac{d}{d t} \frac{d \mathcal{L}}{d \dot{q}_1} - \frac{d \mathcal{L}}{d q_1}
+= (m_1 + m_2) l_1^2 \ddot{q}_1 + m_2 l_1 l_2 \cos(q_1 - q_2) \ddot{q}_2 + m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_2^2 + (m_1 + m_2) g l_1 \sin{q_1}
+= 0
+\end{equation*}
+
+\begin{equation*}
+\frac{d}{d t} \frac{d \mathcal{L}}{d \dot{q}_2} - \frac{d \mathcal{L}}{d q_2}
+= m_2 l_2^2 \ddot{q}_2 + m_2 l_1 l_2 \cos(q_1 - q_2) \ddot{q}_1 - m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_1^2 + m_2 g l_2 \sin{q_2}
+= 0
+\end{equation*}
+
+These equations can be rewritten as the ODE:
+
+\begin{equation*}
+    \begin{bmatrix}
+        (m_1 + m_2) l_1^2 & m_2 l_1 l_2 \cos(q_1 - q_2) \\
+        m_2 l_1 l_2 \cos(q_1 - q_2) & m_2 l_2^2
+    \end{bmatrix} \begin{bmatrix} \ddot{q}_1 \\ \ddot{q}_2 \end{bmatrix}
+    = \begin{bmatrix} -m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_2^2 - (m_1 + m_2) g l_1 \sin{q_1} \\ m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_1^2 - m_2 g l_2 \sin{q_2}\end{bmatrix}
+\end{equation*}
+
+\noindent and again rewritten into state space form:
+
+\begin{adjustwidth}{-2cm}{-2cm}
+    \begin{equation}
+        \frac{d}{d t} \begin{bmatrix} q_1 \\ q_2 \\ \dot{q}_1 \\ \dot{q}_2 \end{bmatrix}
+        %\begin{bmatrix} \dot{q}_1 \\ \dot{q}_2 \\ \ddot{q}_1 \\ \ddot{q}_2 \end{bmatrix}
+        = \begin{bmatrix}
+            \dot{q}_1 \\ \dot{q}_2 \\ 
+            \begin{bmatrix}
+                (m_1 + m_2) l_1^2 & m_2 l_1 l_2 \cos(q_1 - q_2) \\
+                m_2 l_1 l_2 \cos(q_1 - q_2) & m_2 l_2^2
+            \end{bmatrix}^{-1}
+            \begin{bmatrix} -m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_2^2 - (m_1 + m_2) g l_1 \sin{q_1} \\ m_2 l_1 l_2 \sin(q_1 - q_2) \dot{q}_1^2 - m_2 g l_2 \sin{q_2}\end{bmatrix}
+        \end{bmatrix}
+    \end{equation}
+\end{adjustwidth}
