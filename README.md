@@ -1,5 +1,5 @@
 # Motion Classification with Neural Ordinary Differential Equations
-## Master Thesis 2022
+## Computer Science Master Thesis 2022
 
 ### [Link](https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/3024692)
 
